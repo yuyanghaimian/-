@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html> 
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0"/>
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <title>收货地址管理</title>
+    <link type="image/x-icon" rel="shortcut icon" href="../images/favicon.ico">
+    <link rel="stylesheet" href="../res/mui/css/mui.min.css"/>
+    <link rel="stylesheet" href="../res/fontAwesome/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="../css/common.css"/>
+    <link rel="stylesheet" href="../css/user.css"/>
+</head>
+<body>
+<div class="cz_layout bgg">
+    <header class="cz_topBar">
+        <a href="javascript:history.back();" class="icon_back fa fa-arrow-left"></a>
+        <span class="title">收货地址管理</span>
+    </header>
+    <div class="cz_container">
+        <ul class="mui-table-view"  id="address">
+         
+           
+        </ul>
+        <a href="/letao/user/addressManage.html"  class="mui-btn mui-btn-primary btn_login" >添加</a>
+    </div>
+    <footer class="cz_tabs">
+        <a class="tab_home fa fa-home" href="../index.html"><span>首页</span></a>
+        <a class="tab_cate fa fa-bars" href="../cate.html"><span>分类</span></a>
+        <a class="tab_cart fa fa-shopping-cart" href="../cart.html"><span>购物车</span></a>
+        <a class="tab_user fa fa-user" href="../user/index.html"><span>会员中心</span></a>
+    </footer>
+</div>
+
+<!-- 定义魔板 -->
+
+<script type="text/html" id="tpl">
+    {{each lists val}}
+    <li class="mui-table-view-cell">
+            <div class="mui-slider-right mui-disabled">
+                <a class="mui-btn mui-btn-red delete" data-id={{val.id}} >删除</a>
+            </div>
+            <a href="/letao/user/editAddress.html" class="mui-navigate-right mui-slider-handle">
+                <div class="delivery">邮编：<span>{{val.postcode}}</span>&nbsp;收货人：<span>{{val.recipients}}</span></div>
+                <div class="address"> {{val.address}} {{val.addressDetail }}</div>
+            </a>
+        </li>
+        {{/each}}
+</script>
+<script src="../js/jquery.min.js"></script>
+<script src="../res/mui/js/mui.min.js"></script>
+<script src="../js/template-web.js"></script>
+<script>
+    // 获取地址列表       
+        $.ajax({
+            url:'/api/address/queryAddress',
+            type:'get',
+            success:function(info){
+                console.log(info);
+              if(info.error) return location.href = '/letao/user/login.html';
+
+
+            var html = template('tpl',{lists:info});
+
+            $('#address').html(html);
+                  
+              
+                
+            }
+
+        })
+
+        // 删除
+        $('#address').on('click' , '.delete',function(){
+            var id = $(this).attr('data-id');
+            var _this= $(this)
+
+            mui.confirm(
+                '删除后不可恢复',
+                '确定删除吗',
+                ['是','否'],
+                function(res){
+                    if(res.index ==0 ){
+                        $.ajax({
+                                 url:"/api/address/deleteAddress",
+                                 type:'post',
+                                 data:{id:id},
+                                 success:function(info){
+            
+                                if(info.success){
+                    
+                                 _this.parents('li').fadeOut(function(){
+                                 $(this).remove();
+                                 });
+                                 }else{
+                                     alert(info.message);
+                                     }
+            }
+        });
+                    }
+                }
+
+            )
+      
+
+        // 阻止表单提交
+        return false;
+    })
+  
+</script>
+</body>
+</html>
